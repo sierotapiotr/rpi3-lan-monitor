@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
+pip install -r requirements.txt
 ./run.sh
-uwsgi --ini uwsgi_config.ini --chmod-socket=666
