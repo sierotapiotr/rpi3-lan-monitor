@@ -2,4 +2,5 @@ flask
 sqlalchemy
 flask_login
 flask_wtf
+flask_bootstrap
 wtforms

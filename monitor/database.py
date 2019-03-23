@@ -12,5 +12,4 @@ Base = declarative_base()
 Base.metadata.bind = engine
 
 def init_db():
-    import monitor.models
     Base.metadata.create_all(bind=engine)

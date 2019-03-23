@@ -1,5 +1,20 @@
-{% extends "base.html"
+{% extends "base.html" %}
 
 {% block content %}
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">Raspberry Pi LAN Monitor</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('settings') }}">Settings</a></li>
+                <li><a href="{{ url_for('logout') }}">Wyloguj</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
 Witaj, {{ name }}
 {%- endblock content %}
