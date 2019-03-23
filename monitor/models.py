@@ -1,7 +1,7 @@
 from flask_login import UserMixin
 from monitor import login
 from monitor.database import Base, Session
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Boolean
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(UserMixin, Base):
@@ -10,6 +10,7 @@ class User(UserMixin, Base):
     id = Column(Integer, primary_key=True)
     email = Column(String(80), unique=True)
     password = Column(String(80))
+    monitoring_activated = Column(Boolean)
 
     def set_password(self, password):
         self.password = generate_password_hash(password)

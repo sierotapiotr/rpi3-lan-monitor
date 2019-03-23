@@ -11,7 +11,7 @@ import logging
 @login_required
 def dashboard():
     user_name = current_user.email.split("@")[0]
-    return render_template("dashboard.html", name=user_name)
+    return render_template("dashboard.html", name=user_name, user=current_user)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -22,13 +22,6 @@ def login():
     if form.validate_on_submit():
         session = Session()
         user = session.query(User).filter_by(email=form.email.data).first()
-        user.set_password(form.password.data)
-        session.commit()
-        Session.remove()
-        session = Session()
-        user = session.query(User).filter_by(email=form.email.data).first()
-
-        logging.info(user.password)
         if user.check_password(form.password.data):
             login_user(user)
             Session.remove()
@@ -41,18 +34,32 @@ def login():
 
 
 @app.route('/logout')
+@login_required
 def logout():
     logout_user()
     return redirect(url_for("login"))
 
 
 @app.route('/settings')
+@login_required
 def settings():
     return redirect(url_for("settings"))
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     Session.remove()
+
+
+@app.route('/toggle_monitoring')
+@login_required
+def toggle_monitoring():
+    session = Session()
+    session.query(User).filter(User.id == current_user.id).update({User.monitoring_activated: not current_user.monitoring_activated})
+    session.commit()
+    logging.info('Monitoring toggled.')
+    Session.remove()
+    return redirect(url_for('dashboard'))
+
 
 
 if __name__ == "__main__":
