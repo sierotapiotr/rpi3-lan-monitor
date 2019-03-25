@@ -1,4 +1,6 @@
 monitorenv
 .idea
+*.egg-info
+venv
 logs
 __pycache__

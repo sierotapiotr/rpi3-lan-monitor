@@ -7,3 +7,6 @@ class LoginForm(FlaskForm):
     email = StringField('E-mail', validators=[InputRequired(), Email(message="Nieprawidłowy adres email.")])
     password = PasswordField('Hasło', validators=[InputRequired(), Length(min=8, max=80)])
 
+
+class SettingsForm(FlaskForm):
+    target = StringField('Pula monitorowanych adresów:', validators=[InputRequired()])

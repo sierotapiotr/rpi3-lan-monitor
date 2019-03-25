@@ -1,10 +1,11 @@
 from flask import flash, redirect, url_for, render_template
 from flask_login import login_user, logout_user, login_required, current_user
-from monitor import app
-from monitor.forms import LoginForm
-from monitor.models import User
-from monitor.database import Session
+from monitor import app, login_manager
+from monitor.forms import LoginForm, SettingsForm
+from database.database import Session, User
 import logging
+import re
+
 
 @app.route("/")
 @app.route("/dashboard")
@@ -33,6 +34,14 @@ def login():
     return render_template("login.html", form=form)
 
 
+@login_manager.user_loader
+def load_user(id):
+    session = Session()
+    user = session.query(User).get(int(id))
+    Session.remove()
+    return user
+
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -40,10 +49,31 @@ def logout():
     return redirect(url_for("login"))
 
 
-@app.route('/settings')
+@app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
-    return redirect(url_for("settings"))
+    form = SettingsForm()
+    if form.validate_on_submit():
+        logging.info("Settings form validated.")
+        address_pattern = r'(?:\d{1,3}\.){3}\d{1,3}(?:(?:-(?:\d{1,3}\.){3}\d{1,3})|(?:\/(?:[2][1-9]|[3][0-2])))?'
+        address_string = form.target.data
+        address_list = re.findall(address_pattern, address_string)
+        address = "; ".join(address_list)
+        if address == "":
+            return redirect(url_for("settings"))
+
+        logging.info("Address: " + address)
+
+        session = Session()
+        session.query(User).filter(User.id == current_user.id).update(
+            {User.target: address})
+        session.commit()
+        logging.info('Target address changed to: ' + address)
+        Session.remove()
+        return redirect(url_for("dashboard"))
+
+    return render_template("settings.html", form=form)
+
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):

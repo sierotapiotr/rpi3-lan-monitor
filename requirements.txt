@@ -3,4 +3,5 @@ sqlalchemy
 flask_login
 flask_wtf
 flask_bootstrap
+python-nmap
 wtforms
