@@ -1,6 +1,7 @@
+logs
 monitorenv
 .idea
+*.sqlite
 *.egg-info
 venv
-logs
 __pycache__

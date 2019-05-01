@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html>
-<head>
-    {% block head %}
-
+<html lang="pl">
+  <head>
+          {% block head %}
     <title>Raspberry Pi LAN Monitor</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,28 +10,39 @@
     <meta name="description" content="Monitoring tool for local area networks.">
     <meta name="author" content="Piotr Sierota">
 
-    {%- block styles %}
+   {%- block styles %}
     <link rel="stylesheet" href="{{url_for('.static', filename='css/bootstrap.min.css')}}">
         <link rel="stylesheet" href="{{url_for('.static', filename='css/base.css')}}">
+          <link href="{{url_for('.static', filename='css/justified-nav.css')}}" rel="stylesheet">
     {%- endblock styles %}
+
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+          {%- endblock head %}
+  </head>
+  <body>
+    <div class="container">
+      <div class="masthead">
+        <h3 class="text-muted">Raspberry Pi LAN Monitor</h3>
+        <nav>
+          <ul class="nav nav-justified">
+            <li class="active"><a href="{{ url_for('networkState') }}">Stan sieci</a></li>
+                <li><a href="{{ url_for('statistics') }}">Statystyki</a></li>
+                <li><a href="{{ url_for('settings') }}">Ustawienia</a></li>
+                <li><a href="{{ url_for('logout') }}">Wyloguj</a></li>
+          </ul>
+        </nav>
+      </div>
+        {% block content %}
 
-    {%- endblock head %}
-</head>
-
-<body>
-{% block content %}
-
-{%- endblock content %}
-</div>
-{% block scripts %}
+        {%- endblock content %}
+    </div>
+  {% block scripts %}
 
 {%- endblock scripts %}
-
-</body>
+  </body>
 </html>

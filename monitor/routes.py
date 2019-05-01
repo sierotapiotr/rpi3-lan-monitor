@@ -2,23 +2,38 @@ from flask import flash, redirect, url_for, render_template
 from flask_login import login_user, logout_user, login_required, current_user
 from monitor import app, login_manager
 from monitor.forms import LoginForm, SettingsForm
-from database.database import Session, User
+from monitor.anomaly_finder import findUntrustedMacAddresses
+from database.database import Session, User, MonitoringSession, TrustedHost
 import logging
 import re
 
 
 @app.route("/")
-@app.route("/dashboard")
+@app.route("/network_state")
 @login_required
-def dashboard():
+def networkState():
     user_name = current_user.email.split("@")[0]
-    return render_template("dashboard.html", name=user_name, user=current_user)
+    session = Session()
+    try:
+        recent_hosts = session.query(MonitoringSession).order_by(MonitoringSession.id.desc()).first().detected_hosts
+    except Exception as e:
+        logging.info(str(type(e)) + str(e))
+        logging.info("Not enough monitoring sessions performed yet.")
+        return "Czas monitorowania sieci jest zbyt krótki, by wyświetlić wyniki."
+    try:
+        trusted_hosts = session.query(TrustedHost).all()
+        new_mac_addresses = findUntrustedMacAddresses(trusted_hosts, recent_hosts)
+        return render_template("network_state.html", name=user_name, user=current_user, results=new_mac_addresses)
+    except Exception as e:
+        logging.info(str(type(e)) + str(e))
+        logging.info("Looking for anomalies failed.")
+        return "Nie udało się przeprowadzić poszukiwania anomalii."
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('networkState'))
     form = LoginForm()
     if form.validate_on_submit():
         session = Session()
@@ -26,7 +41,7 @@ def login():
         if user.check_password(form.password.data):
             login_user(user)
             Session.remove()
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("networkState"))
         else:
             flash('Podano niewłaściwy adres e-mail lub hasło.')
             Session.remove()
@@ -70,7 +85,7 @@ def settings():
         session.commit()
         logging.info('Target address changed to: ' + address)
         Session.remove()
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("networkState"))
 
     return render_template("settings.html", form=form)
 
@@ -78,6 +93,11 @@ def settings():
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     Session.remove()
+
+@app.route('/statistics')
+@login_required
+def statistics():
+    return render_template('statistics.html')
 
 
 @app.route('/toggle_monitoring')
@@ -88,8 +108,21 @@ def toggle_monitoring():
     session.commit()
     logging.info('Monitoring toggled.')
     Session.remove()
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('networkState'))
 
+
+@app.route('/toggle_learning')
+@login_required
+def toggle_learning():
+    session = Session()
+    if current_user.network_learning == "active":
+        session.query(User).filter(User.id == current_user.id).update({User.network_learning: "finished"})
+    else:
+        session.query(User).filter(User.id == current_user.id).update({User.network_learning: "active"})
+    session.commit()
+    logging.info('Network learning toggled.')
+    Session.remove()
+    return redirect(url_for('networkState'))
 
 
 if __name__ == "__main__":

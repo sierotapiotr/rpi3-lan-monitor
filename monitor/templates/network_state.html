@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-12">
+        <h3 class="page-header">Witaj, {{ name }}
+        </h3>
+        {% if user.network_learning == 'before' %}
+        <p>Przed rozpoczęciem monitorowania zalecany jest okres nauki sieci.</p>
+        <a href="{{ url_for('toggle_learning') }}" class="btn btn-primary">
+            Rozpocznij naukę sieci</a>
+        {% elif user.network_learning == 'active' %}
+        <p>Od X dni trwa nauka sieci. Wykryto Y hostów.</p>
+        <a href="{{ url_for('toggle_learning') }}" class="btn btn-primary">
+            Zakończ naukę sieci</a>
+        {% elif user.network_learning == 'finished' and user.monitoring_activated == 0 %}
+        <p>Monitorowanie sieci wyłączone.</p>
+        <a href="{{ url_for('toggle_monitoring') }}" class="btn btn-primary">
+            Uruchom monitorowanie sieci</a>
+        <a href="{{ url_for('toggle_learning') }}" class="btn btn-primary">
+            Wróć do nauki sieci</a>
+        {% else %}
+        <p>Monitorowanie sieci włączone.</p>
+        <a href="{{ url_for('toggle_monitoring') }}" class="btn btn-primary">
+            Wstrzymaj monitorowanie sieci </a>
+        <a href="{{ url_for('toggle_learning') }}" class="btn btn-primary">
+            Wróć do nauki sieci</a>
+        {% endif %}
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col-md-12">
+        <h3>Wykryte hosty</h3>
+        <table class="table">
+            <thead>
+            <tr>
+                <th> Adres MAC
+                </th>
+                <th> Ostatnio widziany
+                </th>
+                <th> Czas połączenia (ost. 24h)
+                </th>
+                <th> Urządzenie
+                </th>
+                <th> Status
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for host in detected_hosts %}
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<hr>
+<div class="row">
+    <div class="col-md-12">
+        <h3>Otwarte porty powiązane z podatnymi aplikacjami</h3>
+        <table class="table">
+            <thead>
+            <tr>
+                <th> Port
+                </th>
+                <th> Host
+                </th>
+                <th> Aplikacja
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for port in open_ports %}
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{%- endblock content %}
