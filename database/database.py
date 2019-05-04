@@ -5,9 +5,12 @@ import logging
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Text, DateTime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from config_dev import Config
+from configparser import ConfigParser, ExtendedInterpolation
 
-sqlalchemy_uri = Config.sqlalchemy_uri_monitor
+config = ConfigParser(interpolation=ExtendedInterpolation())
+config.read('config/config_dev.ini')
+
+sqlalchemy_uri = config['sqlalchemy']['SQLALCHEMY_URI_MONITOR']
 engine = create_engine(sqlalchemy_uri)
 session_factory = sessionmaker(bind=engine)
 Session = scoped_session(session_factory)

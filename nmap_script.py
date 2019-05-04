@@ -1,11 +1,10 @@
-from config_dev import Config
 from database.database import User, MonitoringSession, DetectedHost, TrustedHost, OpenPort
 from database.suspicious_ports_services import SUSPICIOUS_PORTS, SUSPICIOUS_SERVICES
-from monitoring_scripts.arp_script import getMacAddress
+from arp_script import getMacAddress
 from monitor_utils.db_utils import sqlalchemyTuplesToList
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
+from configparser import ConfigParser, ExtendedInterpolation
 
 import nmap
 import logging
@@ -17,14 +16,16 @@ TARGET = sys.argv[2]
 
 NOW = datetime.datetime.now()
 
-PATH_LOGS = "../logs/"
-PATH_OUTPUT = "nmap/output/"
+PATH_LOGS = "logs/"
+PATH_OUTPUT = "output/nmap"
 
 logging.basicConfig(filename=PATH_LOGS + 'nmap_log.log', level=logging.INFO, format='%(asctime)s %(message)s')
 
-sqlachemy_uri = Config.sqlalchemy_uri_monitoring_scripts
+config = ConfigParser(interpolation=ExtendedInterpolation())
+config.read('config/config_dev.ini')
 
-engine = create_engine(sqlachemy_uri)
+sqlalchemy_uri = config['sqlalchemy']['SQLALCHEMY_URI_MONITORING_SCRIPTS']
+engine = create_engine(sqlalchemy_uri)
 session_factory = sessionmaker(bind=engine)
 Session = scoped_session(session_factory)
 
