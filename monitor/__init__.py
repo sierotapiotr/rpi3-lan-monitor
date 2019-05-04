@@ -1,20 +1,20 @@
 from flask import Flask
 from flask_login import LoginManager
 from flask_bootstrap import Bootstrap
-from configparser import ConfigParser, ExtendedInterpolation
+from configparser import ConfigParser
 import logging
+import os
 
 app = Flask(__name__)
 
-config = ConfigParser(interpolation=ExtendedInterpolation())
-config.read('config/config_dev.ini')
+current_file_path = os.path.dirname(os.path.abspath(__file__))
+
+config = ConfigParser()
+config.read(current_file_path + '/../app_config.ini')
 app.config['SECRET_KEY'] = config['general']['SECRET_KEY']
-app.config['SQLALCHEMY_DATABASE_URI'] = config['sqlalchemy']['SQLALCHEMY_URI_MONITOR']
+app.config['SQLALCHEMY_DATABASE_URI'] = config['sqlalchemy']['SQLALCHEMY_DATABASE_URI']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = bool(int(config['sqlalchemy']['SQLALCHEMY_TRACK_MODIFICATIONS']))
 app.config['TEMPLATES_AUTO_RELOAD'] = bool(int(config['general']['TEMPLATES_AUTO_RELOAD']))
-
-logging.info(app.config['SQLALCHEMY_TRACK_MODIFICATIONS'])
-logging.info(app.config['TEMPLATES_AUTO_RELOAD'])
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -23,4 +23,4 @@ Bootstrap(app)
 
 logging.basicConfig(filename='logs/monitor_log.log', level=logging.INFO, format='%(asctime)s %(message)s')
 
-from monitor import routes
+import monitor.routes

@@ -2,9 +2,9 @@ import subprocess
 import re
 import logging
 
-def getMacAddress(address):
+def get_mac_address(address):
     mac_address_pattern = r'((?:[0-f]{2}:){5}[0-f]{2})'
-    proc = subprocess.run(["arp", address], encoding='utf-8', stdout=subprocess.PIPE)
+    proc = subprocess.run(["/usr/sbin/arp", address], universal_newlines=True, stdout=subprocess.PIPE)
     splited_output = proc.stdout.split("\n")
     most_recent_line = splited_output[-2]
     try:
