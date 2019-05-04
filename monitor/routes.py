@@ -11,37 +11,32 @@ import re
 @app.route("/")
 @app.route("/network_state")
 @login_required
-def networkState():
+def network_state():
     user_name = current_user.email.split("@")[0]
     session = Session()
-    try:
-        recent_hosts = session.query(MonitoringSession).order_by(MonitoringSession.id.desc()).first().detected_hosts
-    except Exception as e:
-        logging.info(str(type(e)) + str(e))
-        logging.info("Not enough monitoring sessions performed yet.")
-        return "Czas monitorowania sieci jest zbyt krótki, by wyświetlić wyniki."
-    try:
-        trusted_hosts = session.query(TrustedHost).all()
-        new_mac_addresses = findUntrustedMacAddresses(trusted_hosts, recent_hosts)
-        return render_template("network_state.html", name=user_name, user=current_user, results=new_mac_addresses)
-    except Exception as e:
-        logging.info(str(type(e)) + str(e))
-        logging.info("Looking for anomalies failed.")
-        return "Nie udało się przeprowadzić poszukiwania anomalii."
+    recent_monitoring_session = session.query(MonitoringSession).order_by(MonitoringSession.id.desc()).first()
+    if recent_monitoring_session is None:
+        return render_template("network_state.html", name=user_name, user=current_user)
+    recent_hosts = recent_monitoring_session.detected_hosts
+    trusted_hosts = session.query(TrustedHost).all()
+    new_mac_addresses = findUntrustedMacAddresses(trusted_hosts, recent_hosts)
+    return render_template("network_state.html", name=user_name, user=current_user, results=new_mac_addresses)
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('networkState'))
+        return redirect(url_for('network_state'))
     form = LoginForm()
     if form.validate_on_submit():
+        logging.info('LoginForm validated.')
         session = Session()
         user = session.query(User).filter_by(email=form.email.data).first()
         if user.check_password(form.password.data):
             login_user(user)
             Session.remove()
-            return redirect(url_for("networkState"))
+            logging.info('User successfully logged in.')
+            return redirect(url_for("network_state"))
         else:
             flash('Podano niewłaściwy adres e-mail lub hasło.')
             Session.remove()
@@ -85,7 +80,7 @@ def settings():
         session.commit()
         logging.info('Target address changed to: ' + address)
         Session.remove()
-        return redirect(url_for("networkState"))
+        return redirect(url_for("network_state"))
 
     return render_template("settings.html", form=form)
 
@@ -93,6 +88,7 @@ def settings():
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     Session.remove()
+
 
 @app.route('/statistics')
 @login_required
@@ -108,7 +104,7 @@ def toggle_monitoring():
     session.commit()
     logging.info('Monitoring toggled.')
     Session.remove()
-    return redirect(url_for('networkState'))
+    return redirect(url_for('network_state'))
 
 
 @app.route('/toggle_learning')
@@ -122,7 +118,7 @@ def toggle_learning():
     session.commit()
     logging.info('Network learning toggled.')
     Session.remove()
-    return redirect(url_for('networkState'))
+    return redirect(url_for('network_state'))
 
 
 if __name__ == "__main__":
