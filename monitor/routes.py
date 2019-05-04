@@ -1,26 +1,36 @@
 from flask import flash, redirect, url_for, render_template
 from flask_login import login_user, logout_user, login_required, current_user
-from monitor import app, login_manager
-from monitor.forms import LoginForm, SettingsForm
-from monitor.anomaly_finder import findUntrustedMacAddresses
-from database.database import Session, User, MonitoringSession, TrustedHost
 import logging
 import re
+import datetime
 
+from monitor import app, login_manager
+from monitor.forms import LoginForm, SettingsForm
+from monitor.anomaly_finder import find_untrusted_mac_addresses
+from monitor_utils.db_utils import sqlalchemy_tuples_to_list
+from database.database import Session, User, MonitoringSession, TrustedHost
 
 @app.route("/")
 @app.route("/network_state")
 @login_required
 def network_state():
     user_name = current_user.email.split("@")[0]
+    interval_end = datetime.datetime.now()
+    interval_beginning = interval_end - datetime.timedelta(hours=24)
+
     session = Session()
-    recent_monitoring_session = session.query(MonitoringSession).order_by(MonitoringSession.id.desc()).first()
-    if recent_monitoring_session is None:
+    recent_monitoring_sessions = session.query(MonitoringSession).order_by(MonitoringSession.id.desc()).\
+        filter(MonitoringSession.datetime > interval_beginning).all()
+
+    #detected_hosts = set([monitoring_session.detected_hosts for monitoring_session in recent_monitoring_sessions]})
+    if len(recent_monitoring_sessions) is 0:
         return render_template("network_state.html", name=user_name, user=current_user)
-    recent_hosts = recent_monitoring_session.detected_hosts
-    trusted_hosts = session.query(TrustedHost).all()
-    new_mac_addresses = findUntrustedMacAddresses(trusted_hosts, recent_hosts)
-    return render_template("network_state.html", name=user_name, user=current_user, results=new_mac_addresses)
+    logging.info(recent_monitoring_sessions)
+
+    #recent_hosts = recent_monitoring_sessions.detected_hosts
+    #trusted_hosts = session.query(TrustedHost).all()
+    #untrusted_addresses = find_untrusted_mac_addresses(trusted_hosts, recent_hosts)
+    return render_template("network_state.html", name=user_name, user=current_user)#, detected_hosts=recent_hosts)
 
 
 @app.route('/login', methods=['GET', 'POST'])

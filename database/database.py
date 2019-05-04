@@ -1,16 +1,18 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship
 from sqlalchemy.ext.declarative import declarative_base
-import logging
 from sqlalchemy import Column, ForeignKey, Integer, String, Boolean, Text, DateTime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from configparser import ConfigParser, ExtendedInterpolation
+from configparser import ConfigParser
+import logging
+import os
 
-config = ConfigParser(interpolation=ExtendedInterpolation())
-config.read('config/config_dev.ini')
+current_file_path = os.path.dirname(os.path.abspath(__file__))
+config = ConfigParser()
+config.read(current_file_path + '/../app_config.ini')
 
-sqlalchemy_uri = config['sqlalchemy']['SQLALCHEMY_URI_MONITOR']
+sqlalchemy_uri = config['sqlalchemy']['SQLALCHEMY_DATABASE_URI']
 engine = create_engine(sqlalchemy_uri)
 session_factory = sessionmaker(bind=engine)
 Session = scoped_session(session_factory)
@@ -52,19 +54,19 @@ class DetectedHost(Base):
     open_ports = relationship("OpenPort", backref="host")
 
 
+class TrustedHost(Base):
+    __tablename__ = 'trusted_host'
+    id = Column(Integer, primary_key=True)
+    mac_address = Column(String(20))
+    confirmed = Column(Boolean)
+
+
 class OpenPort(Base):
     __tablename__ = 'open_port'
     id = Column(Integer, primary_key=True)
     l3_protocol = Column(String(10))
     port = Column(Integer)
     host_id = Column(Integer, ForeignKey("detected_host.id"))
-
-
-class TrustedHost(Base):
-    __tablename__ = 'trusted_host'
-    id = Column(Integer, primary_key=True)
-    mac_address = Column(String(20))
-    confirmed = Column(Boolean)
 
 
 def init_db():
