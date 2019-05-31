@@ -1,7 +1,8 @@
+build
+dist
 logs
-monitorenv
+venv
 .idea
 *.sqlite
 *.egg-info
-venv
 __pycache__
