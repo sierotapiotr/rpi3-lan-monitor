@@ -49,16 +49,12 @@ class DetectedHost(Base):
     __tablename__ = 'detected_host'
     id = Column(Integer, primary_key=True)
     address = Column(String(20))
-    mac_address = Column(String(20))
+    confirmed = Column(Boolean)
+    last_seen = Column(DateTime)
+    mac_address = Column(String(20), unique=True)
+    manufacturer = Column(Text)
     session_id = Column(Integer, ForeignKey("monitoring_session.id"))
     open_ports = relationship("OpenPort", backref="host")
-
-
-class TrustedHost(Base):
-    __tablename__ = 'trusted_host'
-    id = Column(Integer, primary_key=True)
-    mac_address = Column(String(20))
-    confirmed = Column(Boolean)
 
 
 class OpenPort(Base):

@@ -38,11 +38,11 @@
             <tr>
                 <th> Adres MAC
                 </th>
-                <th> Ostatnio widziany
+                <th> Adres IP
                 </th>
-                <th> Czas połączenia (ost. 24h)
+                <th> Data ostatniego wykrycia
                 </th>
-                <th> Urządzenie
+                <th> Sprzęt
                 </th>
                 <th> Status
                 </th>
@@ -51,10 +51,21 @@
             <tbody>
             {% for host in detected_hosts %}
             <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td>
+                    {{ host.mac_address }}
+                </td>
+                <td>
+                    {{ host.address }}
+                </td>
+                <td>
+                    {{ host.last_seen }}
+                </td>
+                <td>
+                    {{ host.manufacturer }}
+                </td>
+                <td>
+                    {{ host.confirmed }}
+                </td>
             </tr>
             {% endfor %}
             </tbody>

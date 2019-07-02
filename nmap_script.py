@@ -1,4 +1,4 @@
-from database.database import User, MonitoringSession, DetectedHost, TrustedHost, OpenPort
+from database.database import User, MonitoringSession, DetectedHost, OpenPort
 from database.suspicious_ports_services import SUSPICIOUS_PORTS, SUSPICIOUS_SERVICES
 from arp_script import get_mac_address
 from monitor_utils.db_utils import sqlalchemy_tuples_to_list
@@ -27,7 +27,7 @@ sqlalchemy_uri = 'sqlite:///{currentFilePath}/{databaseFilePath}'.format(
     currentFilePath=current_file_path,
     databaseFilePath=config['sqlalchemy']['SQLALCHEMY_DATABASE_FILEPATH'])
 engine = create_engine(sqlalchemy_uri)
-session_factory = sessionmaker(bind=engine)
+session_factory = sessionmaker(bind=engine, expire_on_commit=False)
 Session = scoped_session(session_factory)
 
 db_session = Session()
@@ -35,38 +35,34 @@ target = db_session.query(User.target).filter_by(id=1).first()[0]
 logging.info("Creating port scanner.")
 nm = nmap.PortScanner()
 logging.info("Starting the scanning for " + target)
-nm.scan(hosts=target, arguments="-sS", sudo=True)
+nm.scan(hosts=target, arguments="-sS -O", sudo=True)
+scan_results = nm.csv()
 logging.info("Finished the scanning for " + target)
 
 try:
     db_session = Session()
-    network_learning = db_session.query(User.network_learning).filter_by(id=1).first()[0]
-    logging.info("Network learning: " + network_learning)
-    trusted_hosts = []
-
-    if network_learning == "active":
-        trusted_hosts = db_session.query(TrustedHost.mac_address).all()
-        trusted_hosts = sqlalchemy_tuples_to_list(trusted_hosts)
-        logging.info("Pre-trusted hosts: " + str(trusted_hosts))
-    else:
-        trusted_hosts = db_session.query(TrustedHost.mac_address).filter_by(confirmed=True).all()
-        trusted_hosts = sqlalchemy_tuples_to_list(trusted_hosts)
-        logging.info("Pre-trusted hosts: " + str(trusted_hosts))
 
     monitoring_session = MonitoringSession(datetime=NOW)
     db_session.add(monitoring_session)
-    logging.info("Monitoring session added.")
+
+    network_learning = db_session.query(User.network_learning).filter_by(id=1).first()[0]
+
+    already_detected_addresses = sqlalchemy_tuples_to_list(db_session.query(DetectedHost.mac_address).all())
 
     for host in nm.all_hosts():
-        logging.info("Getting mac address...")
-        mac_address = get_mac_address(host)
-        detected_host = DetectedHost(address=host, mac_address=mac_address)
-        if network_learning == "active" and mac_address not in trusted_hosts:
-            trusted_host = TrustedHost(mac_address=mac_address)
-            db_session.add(trusted_host)
-            logging.info("Added {mac_address} to trusted hosts.".format(mac_address=mac_address))
-        monitoring_session.detected_hosts.append(detected_host)
-        logging.info("Appended host: {host} with MAC address: {mac_address}".format(host=host, mac_address=mac_address))
+        mac_address = nm[host]['addresses']['mac']
+        manufacturer = nm[host]['vendor'][mac_address]
+
+        if mac_address in already_detected_addresses:
+            res =  db_session.query(DetectedHost).filter_by(mac_address=mac_address).all()
+            db_session.query(DetectedHost).filter_by(mac_address=mac_address).update({DetectedHost.last_seen: NOW})
+            db_session.commit()
+        else:
+            detected_host = DetectedHost(address=host, mac_address=mac_address, manufacturer=manufacturer, last_seen=NOW,
+                                         confirmed=False)
+            if network_learning == "active":
+                detected_host.confirmed = True
+            monitoring_session.detected_hosts.append(detected_host)
 
         for l3_protocol in nm[host].all_protocols():
             ports = list(nm[host][l3_protocol].keys())

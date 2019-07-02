@@ -2,6 +2,7 @@ import subprocess
 import re
 import logging
 
+
 def get_mac_address(address):
     mac_address_pattern = r'((?:[0-f]{2}:){5}[0-f]{2})'
     proc = subprocess.run(["/usr/sbin/arp", address], universal_newlines=True, stdout=subprocess.PIPE)

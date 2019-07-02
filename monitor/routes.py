@@ -8,7 +8,8 @@ from monitor import app, login_manager
 from monitor.forms import LoginForm, SettingsForm
 from monitor.anomaly_finder import find_untrusted_mac_addresses
 from monitor_utils.db_utils import sqlalchemy_tuples_to_list
-from database.database import Session, User, MonitoringSession, TrustedHost
+from database.database import Session, User, MonitoringSession, DetectedHost
+
 
 @app.route("/")
 @app.route("/network_state")
@@ -16,21 +17,25 @@ from database.database import Session, User, MonitoringSession, TrustedHost
 def network_state():
     user_name = current_user.email.split("@")[0]
     interval_end = datetime.datetime.now()
-    interval_beginning = interval_end - datetime.timedelta(hours=24)
+    interval_beginning = interval_end - datetime.timedelta(hours=172)
 
     session = Session()
     recent_monitoring_sessions = session.query(MonitoringSession).order_by(MonitoringSession.id.desc()).\
         filter(MonitoringSession.datetime > interval_beginning).all()
 
-    #detected_hosts = set([monitoring_session.detected_hosts for monitoring_session in recent_monitoring_sessions]})
+    detected_hosts = []
+    for monitoring_session in recent_monitoring_sessions:
+        detected_hosts += monitoring_session.detected_hosts
+    detected_hosts = set(detected_hosts)
+    logging.info(detected_hosts)
+
     if len(recent_monitoring_sessions) is 0:
         return render_template("network_state.html", name=user_name, user=current_user)
     logging.info(recent_monitoring_sessions)
 
-    #recent_hosts = recent_monitoring_sessions.detected_hosts
-    #trusted_hosts = session.query(TrustedHost).all()
-    #untrusted_addresses = find_untrusted_mac_addresses(trusted_hosts, recent_hosts)
-    return render_template("network_state.html", name=user_name, user=current_user)#, detected_hosts=recent_hosts)
+    trusted_hosts = session.query(DetectedHost).filter_by(confirmed=True).all()
+    untrusted_addresses = find_untrusted_mac_addresses(trusted_hosts, detected_hosts)
+    return render_template("network_state.html", name=user_name, user=current_user, detected_hosts=detected_hosts)
 
 
 @app.route('/login', methods=['GET', 'POST'])
