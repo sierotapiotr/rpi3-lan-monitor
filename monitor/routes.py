@@ -73,6 +73,17 @@ def logout():
     return redirect(url_for("login"))
 
 
+@app.route('/set_as_confirmed/<host_id>')
+@login_required
+def set_as_confirmed(host_id):
+    session = Session()
+    session.query(DetectedHost).filter(DetectedHost.id == host_id).update({DetectedHost.confirmed: True})
+    session.commit()
+    logging.info('Host set as confirmed.')
+    Session.remove()
+    return redirect(url_for('network_state'))
+
+
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():

@@ -58,13 +58,20 @@
                     {{ host.address }}
                 </td>
                 <td>
-                    {{ host.last_seen }}
-                </td>
-                <td>
                     {{ host.manufacturer }}
                 </td>
                 <td>
-                    {{ host.confirmed }}
+                    {{ host.last_seen }}
+                </td>
+                <td>
+                    {% if host.confirmed %}
+                        Zaufany
+                    {% else %}
+                        Niezaufany
+                        <a href="{{ url_for('set_as_confirmed', host_id=host.id) }}" class="btn">
+                            Oznacz jako zaufany
+                        </a>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
