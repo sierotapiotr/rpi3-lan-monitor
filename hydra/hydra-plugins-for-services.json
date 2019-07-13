@@ -1,0 +1,507 @@
+{
+  "ftp": [
+    "ftp",
+    "ftps"
+  ],
+  "ssh": [
+    "ssh",
+    "sshkey"
+  ],
+  "telnet": [
+    "telnet"
+  ],
+  "smtp": [
+    "smtp",
+    "smtp-enum"
+  ],
+  "http": [
+    "http-form-get",
+    "http-form-post",
+    "http-get",
+    "http-head",
+    "http-post",
+    "http-proxy",
+    "http-proxy-urlenum"
+  ],
+  "pop3": [
+    "pop3"
+  ],
+  "auth": [
+    "vmauthd"
+  ],
+  "nntp": [
+    "nntporacle-listener"
+  ],
+  "ntp": [
+    "nntporacle-listener"
+  ],
+  "imap": [
+    "imap"
+  ],
+  "snmp": [
+    "snmp"
+  ],
+  "irc": [
+    "irc"
+  ],
+  "mpp": [
+    "xmpp"
+  ],
+  "ldap": [
+    "ldap2",
+    "ldap2s",
+    "ldap3",
+    "ldap3-crammd5",
+    "ldap3-digestmd5",
+    "ldap3-crammd5s",
+    "ldap3-digestmd5s"
+  ],
+  "https": [
+    "https-form-get",
+    "https-form-post",
+    "https-get",
+    "https-head",
+    "https-post"
+  ],
+  "smtps": [
+    "smtps"
+  ],
+  "rtsp": [
+    "rtsp"
+  ],
+  "pcnfs": [
+    "pcnfs"
+  ],
+  "ftps": [
+    "ftps"
+  ],
+  "telnets": [
+    "telnets"
+  ],
+  "imaps": [
+    "imaps"
+  ],
+  "pop3s": [
+    "pop3s"
+  ],
+  "socks": [
+    "socks5"
+  ],
+  "oracle": [
+    "nntporacle-listener",
+    "oracle-sid"
+  ],
+  "nfs": [
+    "pcnfs"
+  ],
+  "mysql": [
+    "mysql"
+  ],
+  "ssql": [
+    "mssql"
+  ],
+  "tsp": [
+    "rtsp"
+  ],
+  "svn": [
+    "svn"
+  ],
+  "icq": [
+    "icq"
+  ],
+  "sip": [
+    "sip"
+  ],
+  "redis": [
+    "redis"
+  ],
+  "xmpp": [
+    "xmpp"
+  ],
+  "pcanywhere": [
+    "pcanywhere"
+  ],
+  "ftp-data": [
+    "ftp"
+  ],
+  "rsftp": [
+    "ftp"
+  ],
+  "ni-ftp": [
+    "ftp"
+  ],
+  "via-ftp": [
+    "ftp"
+  ],
+  "tftp": [
+    "ftp"
+  ],
+  "rtelnet": [
+    "telnet"
+  ],
+  "sftp": [
+    "ftp"
+  ],
+  "cisco-fna": [
+    "cisco",
+    "cisco-enable"
+  ],
+  "cisco-tna": [
+    "cisco",
+    "cisco-enable"
+  ],
+  "cisco-sys": [
+    "cisco",
+    "cisco-enable"
+  ],
+  "bftp": [
+    "ftp"
+  ],
+  "snmptrap": [
+    "snmp"
+  ],
+  "softpc": [
+    "ftp"
+  ],
+  "imap3": [
+    "imap"
+  ],
+  "rsh-spx": [
+    "rsh"
+  ],
+  "subntbcst_tftp": [
+    "ftp"
+  ],
+  "firewall1-rdp": [
+    "rdp"
+  ],
+  "asip-webadmin": [
+    "sip"
+  ],
+  "rtsps": [
+    "rtsp"
+  ],
+  "mftp": [
+    "ftp"
+  ],
+  "uucp-rlogin": [
+    "rlogin"
+  ],
+  "openvms-sysipc": [
+    "sip"
+  ],
+  "ftp-agent": [
+    "ftp"
+  ],
+  "imap4-ssl": [
+    "imap"
+  ],
+  "sshell": [
+    "ssh"
+  ],
+  "pftp": [
+    "ftp"
+  ],
+  "asipregistry": [
+    "sip"
+  ],
+  "cisco-tdp": [
+    "cisco",
+    "cisco-enable"
+  ],
+  "netconf-ssh": [
+    "ssh"
+  ],
+  "ftps-data": [
+    "ftps"
+  ],
+  "ircs": [
+    "irc"
+  ],
+  "mxxrlogin": [
+    "rlogin"
+  ],
+  "cisco-ipsla": [
+    "cisco",
+    "cisco-enable"
+  ],
+  "mysql-cluster": [
+    "mysql"
+  ],
+  "carrius-rshell": [
+    "rsh"
+  ],
+  "skytelnet": [
+    "telnet"
+  ],
+  "cisco-net-mgmt": [
+    "cisco",
+    "cisco-enable"
+  ],
+  "tftp-mcast": [
+    "ftp"
+  ],
+  "etftp": [
+    "ftp"
+  ],
+  "mysql-cm-agent": [
+    "mysql"
+  ],
+  "snmp-tcp-port": [
+    "snmp"
+  ],
+  "cisco-sccp": [
+    "cisco",
+    "cisco-enable"
+  ],
+  "brdptc": [
+    "rdp"
+  ],
+  "vmrdp": [
+    "rdp"
+  ],
+  "mysql-im": [
+    "mysql"
+  ],
+  "rsmtp": [
+    "smtp"
+  ],
+  "cvspserver": [
+    "cvs"
+  ],
+  "ssm-cvs": [
+    "cvs"
+  ],
+  "utsftp": [
+    "ftp"
+  ],
+  "hp-3000-telnet": [
+    "telnet"
+  ],
+  "vpsipport": [
+    "sip"
+  ],
+  "corel_vncadmin": [
+    "vnc"
+  ],
+  "oce-snmp-trap": [
+    "snmp"
+  ],
+  "gsiftp": [
+    "ftp"
+  ],
+  "circle-x": [
+    "irc"
+  ],
+  "esip": [
+    "sip"
+  ],
+  "svnetworks": [
+    "svn"
+  ],
+  "tl1-telnet": [
+    "telnet"
+  ],
+  "odette-ftp": [
+    "ftp"
+  ],
+  "squid-snmp": [
+    "snmp"
+  ],
+  "svnet": [
+    "svn"
+  ],
+  "websphere-snmp": [
+    "snmp"
+  ],
+  "raven-rdp": [
+    "rdp"
+  ],
+  "telnetcpcd": [
+    "telnet"
+  ],
+  "tftps": [
+    "ftps"
+  ],
+  "sdo-ssh": [
+    "ssh"
+  ],
+  "cisco-wafs": [
+    "cisco"
+  ],
+  "ml-svnet": [
+    "svn"
+  ],
+  "netconf-ch-ssh": [
+    "ssh"
+  ],
+  "rsip": [
+    "sip"
+  ],
+  "scpi-telnet": [
+    "telnet"
+  ],
+  "strexec-d": [
+    "rexec"
+  ],
+  "strexec-s": [
+    "rexec"
+  ],
+  "sip-tls": [
+    "sip"
+  ],
+  "snmpssh": [
+    "snmp",
+    "ssh"
+  ],
+  "snmpssh-trap": [
+    "snmp",
+    "ssh"
+  ],
+  "xmpp-client": [
+    "xmpp"
+  ],
+  "xmpp-server": [
+    "xmpp"
+  ],
+  "xmpp-bosh": [
+    "xmpp"
+  ],
+  "rrdp": [
+    "rdp"
+  ],
+  "postgresql": [
+    "postgres"
+  ],
+  "smbdirect": [
+    "smb"
+  ],
+  "pcanywheredata": [
+    "pcanywhere"
+  ],
+  "pcanywherestat": [
+    "pcanywhere"
+  ],
+  "cisco-redu": [
+    "cisco",
+    "cisco-enable"
+  ],
+  "vnc-http": [
+    "vnc"
+  ],
+  "vnc-http-1": [
+    "vnc"
+  ],
+  "vnc-http-2": [
+    "vnc"
+  ],
+  "vnc-http-3": [
+    "vnc"
+  ],
+  "vnc-1": [
+    "vnc"
+  ],
+  "vnc-2": [
+    "vnc"
+  ],
+  "vnc-3": [
+    "vnc"
+  ],
+  "cvsup": [
+    "cvs"
+  ],
+  "p2p-sip": [
+    "sip"
+  ],
+  "tl1-ssh": [
+    "ssh"
+  ],
+  "nim-vdrshell": [
+    "rsh"
+  ],
+  "mysql-proxy": [
+    "mysql"
+  ],
+  "odette-ftps": [
+    "ftp",
+    "ftps"
+  ],
+  "kftp-data": [
+    "ftp"
+  ],
+  "kftp": [
+    "ftp"
+  ],
+  "mcftp": [
+    "ftp"
+  ],
+  "ktelnet": [
+    "telnet"
+  ],
+  "cisco-vpath-tun": [
+    "cisco",
+    "cisco-enable"
+  ],
+  "ircu": [
+    "irc"
+  ],
+  "nsrexecd": [
+    "rexec"
+  ],
+  "patrol-snmp": [
+    "snmp"
+  ],
+  "rexecj": [
+    "rexec"
+  ],
+  "cisco-avp": [
+    "cisco",
+    "cisco-enable"
+  ],
+  "rtsp-alt": [
+    "rtsp"
+  ],
+  "cisco-aqos": [
+    "cisco",
+    "cisco-enable"
+  ],
+  "emcrmirccd": [
+    "irc"
+  ],
+  "snmpdtls": [
+    "snmp"
+  ],
+  "snmpdtls-trap": [
+    "snmp"
+  ],
+  "suncacao-snmp": [
+    "snmp"
+  ],
+  "cisco-snat": [
+    "cisco",
+    "cisco-enable"
+  ],
+  "trdp-pd": [
+    "rdp"
+  ],
+  "trdp-md": [
+    "rdp"
+  ],
+  "ssh-mgmt": [
+    "ssh"
+  ],
+  "mysqlx": [
+    "mysql"
+  ],
+  "eftp": [
+    "ftp"
+  ],
+  "ciscocsdb": [
+    "cisco",
+    "cisco-enable"
+  ],
+  "ciscopop": [
+    "cisco",
+    "cisco-enable"
+  ]
+}

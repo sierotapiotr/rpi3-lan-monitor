@@ -38,13 +38,6 @@ class User(UserMixin, Base):
         return check_password_hash(self.password, password)
 
 
-class MonitoringSession(Base):
-    __tablename__ = 'monitoring_session'
-    id = Column(Integer, primary_key=True)
-    datetime = Column(DateTime)
-    detected_hosts = relationship("DetectedHost", backref="session")
-
-
 class DetectedHost(Base):
     __tablename__ = 'detected_host'
     id = Column(Integer, primary_key=True)
@@ -53,8 +46,8 @@ class DetectedHost(Base):
     last_seen = Column(DateTime)
     mac_address = Column(String(20), unique=True)
     manufacturer = Column(Text)
-    session_id = Column(Integer, ForeignKey("monitoring_session.id"))
     open_ports = relationship("OpenPort", backref="host")
+    cracked_passwords = relationship("CrackedPassword", backref="host")
 
 
 class OpenPort(Base):
@@ -62,6 +55,15 @@ class OpenPort(Base):
     id = Column(Integer, primary_key=True)
     l3_protocol = Column(String(10))
     port = Column(Integer)
+    service = Column(Text)
+    host_id = Column(Integer, ForeignKey("detected_host.id"))
+
+
+class CrackedPassword(Base):
+    __tablename__ = 'cracked_password'
+    id = Column(Integer, primary_key=True)
+    login = Column(Text)
+    service = Column(Text)
     host_id = Column(Integer, ForeignKey("detected_host.id"))
 
 
