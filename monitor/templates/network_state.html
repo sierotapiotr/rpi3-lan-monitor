@@ -40,9 +40,9 @@
                 </th>
                 <th> Adres IP
                 </th>
-                <th> Data ostatniego wykrycia
-                </th>
                 <th> Sprzęt
+                </th>
+                <th> Data ostatniego wykrycia
                 </th>
                 <th> Status
                 </th>
@@ -79,22 +79,29 @@
         <table class="table">
             <thead>
             <tr>
-                <th> Port
+                <th> Adres MAC
                 </th>
-                <th> Host
+                <th> Adres IP
+                </th>
+                <th> Sprzęt
+                </th>
+                <th> Port
                 </th>
                 <th> Aplikacja
                 </th>
             </tr>
             </thead>
             <tbody>
-            {% for port in open_ports %}
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
+            {% for host in detected_hosts %}
+                {% for port in host.open_ports %}
+                    <tr>
+                        <td>{{ host_addr_dict[port.host_id]['mac_address'] }}</td>
+                        <td>{{ host_addr_dict[port.host_id]['ip_address'] }}</td>
+                        <td>{{ host_addr_dict[port.host_id]['manufacturer'] }}</td>
+                        <td>{{ port.port }}</td>
+                        <td>{{ port.service }}</td>
+                    </tr>
+                {% endfor %}
             {% endfor %}
             </tbody>
         </table>
