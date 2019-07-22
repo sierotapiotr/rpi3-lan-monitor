@@ -56,6 +56,7 @@ class OpenPort(Base):
     l3_protocol = Column(String(10))
     port = Column(Integer)
     service = Column(Text)
+    suspicious = Column(Boolean)
     host_id = Column(Integer, ForeignKey("detected_host.id"))
 
 

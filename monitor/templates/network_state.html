@@ -101,13 +101,15 @@
             <tbody>
             {% for host in detected_hosts %}
                 {% for port in host.open_ports %}
-                    <tr>
-                        <td>{{ host_addr_dict[port.host_id]['mac_address'] }}</td>
-                        <td>{{ host_addr_dict[port.host_id]['ip_address'] }}</td>
-                        <td>{{ host_addr_dict[port.host_id]['manufacturer'] }}</td>
-                        <td>{{ port.port }}</td>
-                        <td>{{ port.service }}</td>
-                    </tr>
+                    {% if port.suspicious == 1 %}
+                        <tr>
+                            <td>{{ host_addr_dict[port.host_id]['mac_address'] }}</td>
+                            <td>{{ host_addr_dict[port.host_id]['ip_address'] }}</td>
+                            <td>{{ host_addr_dict[port.host_id]['manufacturer'] }}</td>
+                            <td>{{ port.port }}</td>
+                            <td>{{ port.service }}</td>
+                        </tr>
+                    {% endif %}
                 {% endfor %}
             {% endfor %}
             </tbody>

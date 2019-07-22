@@ -6,7 +6,7 @@ import re
 import subprocess
 import sys
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker, scoped_session
 from configparser import ConfigParser
 
@@ -73,7 +73,7 @@ session_factory = sessionmaker(bind=engine, expire_on_commit=False)
 Session = scoped_session(session_factory)
 
 
-def get_plugins_for_hosts():
+def get_hosts_for_plugins():
     logging.info('Getting plugins...')
     plugins_appended = {}
 
@@ -81,7 +81,8 @@ def get_plugins_for_hosts():
         service_to_plugins_dict = json.load(infile)
 
     session = Session()
-    hosts = session.query(DetectedHost).all()
+    latest_detection_datetime = session.query(func.max(DetectedHost.last_seen)).scalar()
+    hosts = session.query(DetectedHost).filter(DetectedHost.last_seen == latest_detection_datetime).all()
 
     for host in hosts:
         for port in host.open_ports:
@@ -106,16 +107,16 @@ def append_plugins_to_dict(plugins_appended, plugins_for_current_service, host_n
 
 
 def create_file_with_targets(plugins_dict, plugin):
-    with open(PATH_OUTPUT + TARGETS_FILENAME + plugin, 'w') as targets_file:
-        for host, port in plugins_dict[plugin].items():
-            targets_file.write("{host}:{port}\n".format(host=host, port=port))
+    with open(os.path.join(PATH_OUTPUT, TARGETS_FILENAME + plugin), 'w') as targets_file:
+        for host_obj, port in plugins_dict[plugin].items():
+            targets_file.write("{host}:{port}\n".format(host=host_obj.address, port=port))
 
 
 def run_hydra(plugin):
-    cmd_hydra = ['hydra', LOGIN_PASSWORD_FLAG, PATH_INPUT + DEFAULT_LOGIN_PASSWORD_FILENAME,
-                 OUTPUT_FLAG, PATH_OUTPUT + OUTPUT_FILENAME + plugin, PARALLEL_CONNECTS_PER_TARGET_FLAG,
+    cmd_hydra = ['hydra', LOGIN_PASSWORD_FLAG, os.path.join(PATH_INPUT, DEFAULT_LOGIN_PASSWORD_FILENAME),
+                 OUTPUT_FLAG, os.path.join(PATH_OUTPUT, OUTPUT_FILENAME + plugin), PARALLEL_CONNECTS_PER_TARGET_FLAG,
                  PARALLEL_CONNECTS_PER_TARGET, OUTPUT_FORMAT_FLAG, OUTPUT_FORMAT, VERBOSE_FLAG, TARGET_FLAG,
-                 PATH_OUTPUT + TARGETS_FILENAME + plugin, LOOP_AROUND_PASSWORD_FLAG, EXIT_AFTER_FIRST_SUCCESS]
+                 os.path.join(PATH_OUTPUT, TARGETS_FILENAME + plugin), LOOP_AROUND_PASSWORD_FLAG, EXIT_AFTER_FIRST_SUCCESS]
     if plugin in PLUGINS_ENCRYPTED:
         cmd_hydra += [SSL_FLAG, plugin]
     else:
@@ -123,7 +124,7 @@ def run_hydra(plugin):
 
     try:
         logging.info('Running hydra for {service}'.format(service=plugin))
-        subprocess.run(cmd_hydra)
+        proc = subprocess.run(cmd_hydra, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         logging.info('Run completed for {service}'.format(service=plugin))
     except Exception as e:
         logging.info('Scan for {service} failed'.format(service=plugin))
@@ -134,11 +135,11 @@ def insert_result_into_database(plugin):
     session = Session()
     passwords_cracked = 0
 
-    with open(PATH_OUTPUT + OUTPUT_FILENAME + plugin) as infile:
+    with open(os.path.join(PATH_OUTPUT, OUTPUT_FILENAME + plugin)) as infile:
         data = json.load(infile)
         for result in data['results']:
             hydra_result = CrackedPassword(detected_host_id=HOST_ID, service=result['service'], port=result['port'],
-                                       login=result['login'])
+                                           login=result['login'])
             session.add(hydra_result)
             passwords_cracked += 1
 
@@ -150,10 +151,10 @@ def insert_result_into_database(plugin):
 
 def main():
     logging.info('Starting hydra script for host_id=' + str(HOST_ID))
-    plugins = get_plugins_for_hosts()
-    plugins_names = plugins.keys()
-    for plugin in plugins_names:
-        create_file_with_targets(plugins, plugin)
+    hosts_for_plugins = get_hosts_for_plugins()
+    plugins = hosts_for_plugins.keys()
+    for plugin in plugins:
+        create_file_with_targets(hosts_for_plugins, plugin)
         run_hydra(plugin)
         try:
             insert_result_into_database(plugin)
