@@ -1,120 +1,155 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-<div class="row">
-    <div class="col-md-12">
-        <h3 class="page-header">Witaj, {{ name }}
-        </h3>
-        {% if user.network_learning == 'before' %}
-        <p>Przed rozpoczęciem monitorowania zalecany jest okres nauki sieci.</p>
-        <a href="{{ url_for('toggle_learning') }}" class="btn btn-primary">
-            Rozpocznij naukę sieci</a>
-        {% elif user.network_learning == 'active' %}
-        <p>Od X dni trwa nauka sieci. Wykryto Y hostów.</p>
-        <a href="{{ url_for('toggle_learning') }}" class="btn btn-primary">
-            Zakończ naukę sieci</a>
-        {% elif user.network_learning == 'finished' and user.monitoring_activated == 0 %}
-        <p>Monitorowanie sieci wyłączone.</p>
-        <a href="{{ url_for('toggle_monitoring') }}" class="btn btn-primary">
-            Uruchom monitorowanie sieci</a>
-        <a href="{{ url_for('toggle_learning') }}" class="btn btn-primary">
-            Wróć do nauki sieci</a>
-        {% else %}
-        <p>Monitorowanie sieci włączone.</p>
-        <a href="{{ url_for('toggle_monitoring') }}" class="btn btn-primary">
-            Wstrzymaj monitorowanie sieci </a>
-        <a href="{{ url_for('toggle_learning') }}" class="btn btn-primary">
-            Wróć do nauki sieci</a>
-        {% endif %}
+    <div class="row">
+        <div class="col-md-12">
+            <h3 class="page-header">Witaj, {{ name }}
+            </h3>
+            {% if user.network_learning == 'before' %}
+                <p>Przed rozpoczęciem monitorowania zalecany jest okres nauki sieci.</p>
+                <a href="{{ url_for('toggle_learning') }}" class="btn btn-primary">
+                    Rozpocznij naukę sieci</a>
+            {% elif user.network_learning == 'active' %}
+                <p>Od X dni trwa nauka sieci. Wykryto Y hostów.</p>
+                <a href="{{ url_for('toggle_learning') }}" class="btn btn-primary">
+                    Zakończ naukę sieci</a>
+            {% elif user.network_learning == 'finished' and user.monitoring_activated == 0 %}
+                <p>Monitorowanie sieci wyłączone.</p>
+                <a href="{{ url_for('toggle_monitoring') }}" class="btn btn-primary">
+                    Uruchom monitorowanie sieci</a>
+                <a href="{{ url_for('toggle_learning') }}" class="btn btn-primary">
+                    Wróć do nauki sieci</a>
+            {% else %}
+                <p>Monitorowanie sieci włączone.</p>
+                <a href="{{ url_for('toggle_monitoring') }}" class="btn btn-primary">
+                    Wstrzymaj monitorowanie sieci </a>
+                <a href="{{ url_for('toggle_learning') }}" class="btn btn-primary">
+                    Wróć do nauki sieci</a>
+            {% endif %}
+        </div>
     </div>
-</div>
-<hr>
-<div class="row">
-    <div class="col-md-12">
-        <h3>Wykryte hosty</h3>
-        <table class="table">
-            <thead>
-            <tr>
-                <th> Adres MAC
-                </th>
-                <th> Adres IP
-                </th>
-                <th> Sprzęt
-                </th>
-                <th> Data ostatniego wykrycia
-                </th>
-                <th> Status
-                </th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for host in detected_hosts %}
-            <tr>
-                <td>
-                    {{ host.mac_address }}
-                </td>
-                <td>
-                    {{ host.address }}
-                </td>
-                <td>
-                    {{ host.manufacturer }}
-                </td>
-                <td>
-                    {{ host.last_seen }}
-                </td>
-                <td>
-                    {% if host.confirmed %}
-                        Zaufany
-                    {% else %}
-                        Niezaufany
-                        <a href="{{ url_for('set_as_confirmed', host_id=host.id) }}" class="btn">
-                            Oznacz jako zaufany
-                        </a>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-<hr>
-<div class="row">
-    <div class="col-md-12">
-        <h3>Otwarte porty powiązane z podatnymi aplikacjami</h3>
-        <table class="table">
-            <thead>
-            <tr>
-                <th> Adres MAC
-                </th>
-                <th> Adres IP
-                </th>
-                <th> Sprzęt
-                </th>
-                <th> Port
-                </th>
-                <th> Aplikacja
-                </th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for host in detected_hosts %}
-                {% for port in host.open_ports %}
-                    {% if port.suspicious == 1 %}
-                        <tr>
-                            <td>{{ host_addr_dict[port.host_id]['mac_address'] }}</td>
-                            <td>{{ host_addr_dict[port.host_id]['ip_address'] }}</td>
-                            <td>{{ host_addr_dict[port.host_id]['manufacturer'] }}</td>
-                            <td>{{ port.port }}</td>
-                            <td>{{ port.service }}</td>
-                        </tr>
-                    {% endif %}
+    <hr>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Wykryte hosty</h3>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th> Adres MAC
+                    </th>
+                    <th> Adres IP
+                    </th>
+                    <th> Sprzęt
+                    </th>
+                    <th> Data ostatniego wykrycia
+                    </th>
+                    <th> Status
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for host in detected_hosts %}
+                    <tr>
+                        <td>
+                            {{ host.mac_address }}
+                        </td>
+                        <td>
+                            {{ host.address }}
+                        </td>
+                        <td>
+                            {{ host.manufacturer }}
+                        </td>
+                        <td>
+                            {{ host.last_seen }}
+                        </td>
+                        <td>
+                            {% if host.confirmed %}
+                                Zaufany
+                            {% else %}
+                                Niezaufany
+                                <a href="{{ url_for('set_as_confirmed', host_id=host.id) }}" class="btn">
+                                    Oznacz jako zaufany
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
                 {% endfor %}
-            {% endfor %}
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
-
+    <hr>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Otwarte porty powiązane z podatnymi aplikacjami</h3>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th> Adres MAC
+                    </th>
+                    <th> Adres IP
+                    </th>
+                    <th> Sprzęt
+                    </th>
+                    <th> Port
+                    </th>
+                    <th> Aplikacja
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for host in detected_hosts %}
+                    {% for port in host.open_ports %}
+                        {% if port.suspicious == 1 %}
+                            <tr>
+                                <td>{{ host_addr_dict[port.host_id]['mac_address'] }}</td>
+                                <td>{{ host_addr_dict[port.host_id]['ip_address'] }}</td>
+                                <td>{{ host_addr_dict[port.host_id]['manufacturer'] }}</td>
+                                <td>{{ port.port }}</td>
+                                <td>{{ port.service }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>Wykryte aplikacje ze słabymi lub domyślnymi hasłami</h3>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th> Adres MAC
+                    </th>
+                    <th> Adres IP
+                    </th>
+                    <th> Sprzęt
+                    </th>
+                    <th> Login
+                    </th>
+                    <th> Port
+                    </th>
+                    <th> Aplikacja
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for host in detected_hosts %}
+                    {% for password in host.cracked_passwords %}
+                        <tr>
+                            <td>{{ host_addr_dict[password.host_id]['mac_address'] }}</td>
+                            <td>{{ host_addr_dict[password.host_id]['ip_address'] }}</td>
+                            <td>{{ host_addr_dict[password.host_id]['manufacturer'] }}</td>
+                            <td>{{ password.login }}</td>
+                            <td>{{ password.port }}</td>
+                            <td>{{ password.service }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 {%- endblock content %}

@@ -96,6 +96,7 @@ def get_hosts_for_plugins():
                 logging.info('Didn\'t find plugin for {service}'.format(service=service))
             except Exception as e:
                 logging.info(str(type(e)) + str(e))
+    Session.remove()
     return plugins_appended
 
 
