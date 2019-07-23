@@ -6,8 +6,6 @@ import datetime
 
 from monitor import app, login_manager
 from monitor.forms import LoginForm, SettingsForm
-from monitor.anomaly_finder import find_untrusted_mac_addresses
-from monitor_utils.db_utils import sqlalchemy_tuples_to_list
 from database.database import Session, User, DetectedHost
 
 

@@ -64,6 +64,7 @@ class CrackedPassword(Base):
     __tablename__ = 'cracked_password'
     id = Column(Integer, primary_key=True)
     login = Column(Text)
+    port = Column(Integer)
     service = Column(Text)
     host_id = Column(Integer, ForeignKey("detected_host.id"))
 

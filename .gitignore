@@ -1,6 +1,7 @@
 build
 dist
 logs
+output
 venv
 .idea
 *.sqlite

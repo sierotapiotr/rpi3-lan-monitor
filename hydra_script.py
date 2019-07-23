@@ -133,18 +133,14 @@ def run_hydra(plugin):
 
 def insert_result_into_database(plugin):
     session = Session()
-    passwords_cracked = 0
+    host = session.query(DetectedHost).filter(DetectedHost.id == HOST_ID).first()
 
     with open(os.path.join(PATH_OUTPUT, OUTPUT_FILENAME + plugin)) as infile:
         data = json.load(infile)
         for result in data['results']:
-            hydra_result = CrackedPassword(detected_host_id=HOST_ID, service=result['service'], port=result['port'],
-                                           login=result['login'])
-            session.add(hydra_result)
-            passwords_cracked += 1
-
-    host = session.query(DetectedHost).filter(DetectedHost.id == HOST_ID).first()
-    host.cracked_passwords = passwords_cracked
+            cracked_password = CrackedPassword(host_id=HOST_ID, service=result['service'], port=result['port'],
+                                                login=result['login'])
+            host.cracked_passwords.append(cracked_password)
     session.commit()
     Session.remove()
 
