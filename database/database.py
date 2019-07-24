@@ -46,6 +46,7 @@ class DetectedHost(Base):
     last_seen = Column(DateTime)
     mac_address = Column(String(20), unique=True)
     manufacturer = Column(Text)
+    notified = Column(Boolean)
     open_ports = relationship("OpenPort", backref="host")
     cracked_passwords = relationship("CrackedPassword", backref="host")
 
@@ -54,6 +55,8 @@ class OpenPort(Base):
     __tablename__ = 'open_port'
     id = Column(Integer, primary_key=True)
     l3_protocol = Column(String(10))
+    last_seen_open = Column(DateTime)
+    notified = Column(Boolean)
     port = Column(Integer)
     service = Column(Text)
     suspicious = Column(Boolean)
@@ -64,6 +67,7 @@ class CrackedPassword(Base):
     __tablename__ = 'cracked_password'
     id = Column(Integer, primary_key=True)
     login = Column(Text)
+    notified = Column(Boolean)
     port = Column(Integer)
     service = Column(Text)
     host_id = Column(Integer, ForeignKey("detected_host.id"))

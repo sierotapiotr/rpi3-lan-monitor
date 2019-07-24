@@ -1,6 +1,7 @@
 build
 dist
 logs
+monitor/secret
 output
 venv
 .idea

@@ -6,10 +6,11 @@ import re
 import subprocess
 import sys
 
-from sqlalchemy import create_engine, func
+from sqlalchemy import create_engine, exists, func
 from sqlalchemy.orm import sessionmaker, scoped_session
 from configparser import ConfigParser
 
+from alert_sender import check_for_dangers
 from database.hydra_plugins import PLUGINS_ENCRYPTED, PLUGINS_UNENCRYPTED
 from database.database import DetectedHost, CrackedPassword
 
@@ -139,9 +140,16 @@ def insert_result_into_database(plugin):
     with open(os.path.join(PATH_OUTPUT, OUTPUT_FILENAME + plugin)) as infile:
         data = json.load(infile)
         for result in data['results']:
-            cracked_password = CrackedPassword(host_id=HOST_ID, service=result['service'], port=result['port'],
-                                                login=result['login'])
-            host.cracked_passwords.append(cracked_password)
+            password_already_known = session.query(exists().where(CrackedPassword.host_id == HOST_ID
+                                                                  and CrackedPassword.login == result['login']
+                                                                  and CrackedPassword.port == result['port']
+                                                                  and CrackedPassword.service == result['service']
+                                                                  )).scalar()
+
+            if not password_already_known:
+                cracked_password = CrackedPassword(host_id=HOST_ID, login=result['login'], notified=False,
+                                               port=result['port'], service=result['service'])
+                host.cracked_passwords.append(cracked_password)
     session.commit()
     Session.remove()
 
@@ -158,6 +166,8 @@ def main():
         except Exception as e:
             logging.info('Failed to insert results into database')
             logging.info(str(type(e)) + str(e))
+
+    check_for_dangers()
 
 
 if __name__ == '__main__':

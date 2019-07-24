@@ -1,10 +1,11 @@
 import sys
 sys.path.append('/home/piotr/.local/lib/python3.6/site-packages')
 
+from alert_sender import check_for_dangers
 from database.database import User, DetectedHost, OpenPort
 from database.suspicious_ports_services import SUSPICIOUS_PORTS, SUSPICIOUS_SERVICES
 from monitor_utils.db_utils import sqlalchemy_tuples_to_list
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, exists
 from sqlalchemy.orm import sessionmaker, scoped_session
 from configparser import ConfigParser
 
@@ -41,7 +42,7 @@ if len(sys.argv) == 1:
 else:
     target = sys.argv[1]
 
-logging.info('Setting', target, 'as target.')
+logging.info('Setting ' + target + ' as target.')
 logging.info("Creating port scanner.")
 nm = nmap.PortScanner()
 logging.info("Starting the scanning for " + target)
@@ -58,10 +59,6 @@ try:
                                for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]])
                          + ["no IP found"])[0]
 
-    delete_ports_query = OpenPort.__table__.delete()
-    db_session.execute(delete_ports_query)
-    db_session.commit()
-
     for host in nm.all_hosts():
         logging.info('Detected host: ' + str(host))
         if host == localhost_ip_addr:
@@ -73,9 +70,8 @@ try:
                 db_session.query(DetectedHost).filter_by(address=host).update({DetectedHost.last_seen: NOW})
                 logging.info('Present host: ' + str(host))
             else:
-                current_host = DetectedHost(address=host, mac_address='localhost', manufacturer='localhost',
-                                            last_seen=NOW,
-                                            confirmed=False)
+                current_host = DetectedHost(address=host, confirmed=False, last_seen=NOW, mac_address='localhost',
+                                            manufacturer='localhost', notified=False)
                 db_session.add(current_host)
                 logging.info('New host: ' + str(host))
             db_session.commit()
@@ -96,32 +92,36 @@ try:
             if mac_address in already_detected_mac_addresses and mac_address is not None:
                 current_host = db_session.query(DetectedHost).filter_by(mac_address=mac_address).first()
                 db_session.query(DetectedHost).filter_by(mac_address=mac_address).update({DetectedHost.last_seen: NOW})
-                db_session.commit()
                 logging.info('Present host: ' + str(host))
             else:
-                current_host = DetectedHost(address=host, mac_address=mac_address, manufacturer=manufacturer, last_seen=NOW,
-                                            confirmed=False)
+                current_host = DetectedHost(address=host, confirmed=False, last_seen=NOW, mac_address=mac_address,
+                                            manufacturer=manufacturer, notified=False)
                 if network_learning == "active":
                     current_host.confirmed = True
                 db_session.add(current_host)
-                db_session.commit()
                 logging.info('New host: ' + str(host))
+            db_session.commit()
 
         open_ports = []
         for l3_protocol in nm[host].all_protocols():
             ports = list(nm[host][l3_protocol].keys())
             for port in ports:
+                subquery = db_session.query(OpenPort).filter(OpenPort.host_id == current_host.id, OpenPort.port == port)
+                port_open_recently = db_session.query(subquery.exists()).scalar()
+                if port_open_recently:
+                    db_session.query(OpenPort).update({OpenPort.last_seen_open: NOW})
+                    continue
                 service = nm[host][l3_protocol][port]['name']
                 if port in SUSPICIOUS_PORTS or service in SUSPICIOUS_SERVICES:
-                    current_host.open_ports.append(OpenPort(l3_protocol=l3_protocol, port=port, service=service,
-                                                            suspicious=True))
+                    open_ports.append(OpenPort(host_id=current_host.id, l3_protocol=l3_protocol, last_seen_open=NOW,
+                                               notified=False, port=port, service=service, suspicious=True))
                 else:
-                    current_host.open_ports.append(OpenPort(l3_protocol=l3_protocol, port=port, service=service,
-                                                            suspicious=False))
+                    open_ports.append(OpenPort(host_id=current_host.id, l3_protocol=l3_protocol, last_seen_open=NOW,
+                                               port=port, service=service, suspicious=False))
                 logging.info("Appended port: " + str(port))
-            db_session.commit()
-
+        db_session.bulk_save_objects(open_ports)
     db_session.commit()
+    check_for_dangers()
 except Exception as e:
     logging.info(str(type(e)) + str(e))
 finally:
