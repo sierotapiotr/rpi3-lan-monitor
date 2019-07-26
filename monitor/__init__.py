@@ -1,9 +1,10 @@
+import logging
+import os
+
+from configparser import ConfigParser
 from flask import Flask
 from flask_login import LoginManager
 from flask_bootstrap import Bootstrap
-from configparser import ConfigParser
-import logging
-import os
 
 app = Flask(__name__)
 
@@ -23,4 +24,7 @@ Bootstrap(app)
 
 logging.basicConfig(filename='logs/monitor_log.log', level=logging.INFO, format='%(asctime)s %(message)s')
 
-import monitor.routes
+import monitor.login
+import monitor.network_state
+import monitor.settings
+import monitor.statistics

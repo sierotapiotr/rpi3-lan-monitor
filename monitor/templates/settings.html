@@ -2,19 +2,30 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 {% block content %}
-<div class="col-sm-9 col-sm-offset-3 main">
-    <h3 class="page-header">Ustawienia
-    </h3>
-        <form method="POST" action="">
-            {{ form.hidden_tag() }}
-            <div class="row">
-            <div class="col-md-4">
-                {{ wtf.form_field(form.target) }}
-            </div>
-                </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h3 class="page-header">Ustawienia
+            </h3>
+            <form method="POST" action="">
+                {{ settings_form.hidden_tag() }}
                 <div class="row">
-            <input class="btn btn-primary" type="submit" value="Zapisz">
+                    <div class="col-md-4">
+                        {{ wtf.form_field(settings_form.target) }}
+                    </div>
                 </div>
-        </form>
-</div>
+                <input class="btn btn-primary" type="submit" value="Zapisz">
+            </form>
+            <form method="POST" action="">
+                {{ password_reset_form.hidden_tag() }}
+                <div class="row">
+                    <div class="col-md-4">
+                        {{ wtf.form_field(password_reset_form.current_password) }}
+                        {{ wtf.form_field(password_reset_form.new_password) }}
+                        {{ wtf.form_field(password_reset_form.repeated_new_password) }}
+                    </div>
+                </div>
+                <input class="btn btn-primary" type="submit" value="Zapisz">
+            </form>
+        </div>
+    </div>
 {%- endblock content %}
