@@ -18,6 +18,15 @@ def settings():
     if request.method == 'GET':
         settings_form.target.data = current_user.target
 
+    return render_template("settings.html", password_reset_form=password_reset_form, settings_form=settings_form)
+
+
+@app.route('/change_range', methods=['POST'])
+@login_required
+def change_range():
+    settings_form = SettingsForm()
+    password_reset_form = PasswordResetForm()
+
     if settings_form.validate_on_submit():
         logging.info("Settings form validated.")
         address_pattern = r'(?:\d{1,3}\.){3}\d{1,3}(?:(?:-(?:\d{1,3}\.){3}\d{1,3})|(?:\/(?:[2][1-9]|[3][0-2])))?'
@@ -35,7 +44,15 @@ def settings():
         session.commit()
         logging.info('Target address changed to: ' + address)
         Session.remove()
-        return redirect(url_for("settings"))
+
+    return render_template("settings.html", password_reset_form=password_reset_form, settings_form=settings_form)
+
+
+@app.route('/change_password', methods=['POST'])
+@login_required
+def change_password():
+    settings_form = SettingsForm()
+    password_reset_form = PasswordResetForm()
 
     if password_reset_form.validate_on_submit():
         logging.info('Password reset form validated')

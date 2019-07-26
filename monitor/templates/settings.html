@@ -6,16 +6,16 @@
         <div class="col-md-12">
             <h3 class="page-header">Ustawienia
             </h3>
-            <form method="POST" action="">
+            <form action="{{ url_for('change_range') }}" method="POST" action="">
                 {{ settings_form.hidden_tag() }}
                 <div class="row">
                     <div class="col-md-4">
                         {{ wtf.form_field(settings_form.target) }}
                     </div>
                 </div>
-                <input class="btn btn-primary" type="submit" value="Zapisz">
+                <input class="btn btn-primary" type="submit" name="submit-btn" value="Zmień zakres">
             </form>
-            <form method="POST" action="">
+            <form action="{{ url_for('change_password') }}" method="POST" action="">
                 {{ password_reset_form.hidden_tag() }}
                 <div class="row">
                     <div class="col-md-4">
@@ -24,7 +24,7 @@
                         {{ wtf.form_field(password_reset_form.repeated_new_password) }}
                     </div>
                 </div>
-                <input class="btn btn-primary" type="submit" value="Zapisz">
+                <input class="btn btn-primary" type="submit" name="submit-btn" value="Zmień hasło">
             </form>
         </div>
     </div>
