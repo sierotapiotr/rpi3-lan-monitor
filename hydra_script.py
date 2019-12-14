@@ -2,7 +2,6 @@ import datetime
 import json
 import logging
 import os
-import re
 import subprocess
 import sys
 
@@ -10,26 +9,27 @@ from sqlalchemy import create_engine, exists, func
 from sqlalchemy.orm import sessionmaker, scoped_session
 from configparser import ConfigParser
 
-from alert_sender import check_for_dangers
 from database.hydra_plugins import PLUGINS_ENCRYPTED, PLUGINS_UNENCRYPTED
 from database.database import DetectedHost, CrackedPassword
-
-# ARGUMENTS
-RUN_ID = sys.argv[1]
-HOST_ID = sys.argv[2]
 
 # CURRENT TIME
 NOW = datetime.datetime.now().strftime("%Y-%m-%d-%H:%M")
 
 # PATHS
-PATH_INPUT = 'hydra/'
-PATH_LOGS = "logs"
-PATH_OUTPUT = "output/hydra/{runId}".format(runId=RUN_ID)
+current_file_path = os.path.dirname(os.path.abspath(__file__))
+PATH_INPUT = current_file_path + '/hydra/'
+PATH_LOGS = current_file_path + "/logs/"
+PATH_OUTPUT = current_file_path + "/output/hydra/{runDate}".format(runDate=NOW)
 
 if not os.path.exists(PATH_OUTPUT):
     os.makedirs(PATH_OUTPUT)
 if not os.path.exists(PATH_LOGS):
     os.makedirs(PATH_LOGS)
+
+
+# LOGGING
+logging.basicConfig(filename=PATH_LOGS + 'hydra.log', level=logging.INFO, format='%(asctime)s %(message)s')
+logging.info('Starting hydra script.')
 
 # HYDRA TOOL CONFIG
 DEFAULT_LOGIN_PASSWORD_FILENAME = 'default-logins-passwords.lst'
@@ -56,8 +56,6 @@ REVERSE_LOGIN_AS_PASS_CHECK = 'r'
 EXIT_AFTER_FIRST_SUCCESS = "-f"
 SSL_FLAG = "-S"
 
-# LOGGING
-logging.basicConfig(filename=PATH_LOGS + '/hydra.log', level=logging.INFO, format='%(asctime)s %(message)s')
 
 config = ConfigParser()
 config.read(os.path.dirname(os.path.abspath(__file__)) + '/app_config.ini')
@@ -101,11 +99,11 @@ def get_hosts_for_plugins():
     return plugins_appended
 
 
-def append_plugins_to_dict(plugins_appended, plugins_for_current_service, host_name, port):
+def append_plugins_to_dict(plugins_appended, plugins_for_current_service, host_id, port):
     for plugin in plugins_for_current_service:
         if plugin not in plugins_appended.keys():
             plugins_appended[plugin] = {}
-        plugins_appended[plugin][host_name] = port
+        plugins_appended[plugin][host_id] = port
 
 
 def create_file_with_targets(plugins_dict, plugin):
@@ -115,7 +113,7 @@ def create_file_with_targets(plugins_dict, plugin):
 
 
 def run_hydra(plugin):
-    cmd_hydra = ['hydra', LOGIN_PASSWORD_FLAG, os.path.join(PATH_INPUT, DEFAULT_LOGIN_PASSWORD_FILENAME),
+    cmd_hydra = ['/usr/local/bin/hydra', LOGIN_PASSWORD_FLAG, os.path.join(PATH_INPUT, DEFAULT_LOGIN_PASSWORD_FILENAME),
                  OUTPUT_FLAG, os.path.join(PATH_OUTPUT, OUTPUT_FILENAME + plugin), PARALLEL_CONNECTS_PER_TARGET_FLAG,
                  PARALLEL_CONNECTS_PER_TARGET, OUTPUT_FORMAT_FLAG, OUTPUT_FORMAT, VERBOSE_FLAG, TARGET_FLAG,
                  os.path.join(PATH_OUTPUT, TARGETS_FILENAME + plugin), LOOP_AROUND_PASSWORD_FLAG, EXIT_AFTER_FIRST_SUCCESS]
@@ -133,21 +131,21 @@ def run_hydra(plugin):
         logging.info(str(type(e)) + str(e))
 
 
-def insert_result_into_database(plugin):
+def insert_result_into_database(host_id, plugin):
     session = Session()
-    host = session.query(DetectedHost).filter(DetectedHost.id == HOST_ID).first()
+    host = session.query(DetectedHost).filter(DetectedHost.id == host_id).first()
 
     with open(os.path.join(PATH_OUTPUT, OUTPUT_FILENAME + plugin)) as infile:
         data = json.load(infile)
         for result in data['results']:
-            password_already_known = session.query(exists().where(CrackedPassword.host_id == HOST_ID
+            password_already_known = session.query(exists().where(CrackedPassword.host_id == host_id
                                                                   and CrackedPassword.login == result['login']
                                                                   and CrackedPassword.port == result['port']
                                                                   and CrackedPassword.service == result['service']
                                                                   )).scalar()
 
             if not password_already_known:
-                cracked_password = CrackedPassword(host_id=HOST_ID, login=result['login'], notified=False,
+                cracked_password = CrackedPassword(host_id=host_id, login=result['login'], notified=False,
                                                port=result['port'], service=result['service'])
                 host.cracked_passwords.append(cracked_password)
     session.commit()
@@ -155,19 +153,16 @@ def insert_result_into_database(plugin):
 
 
 def main():
-    logging.info('Starting hydra script for host_id=' + str(HOST_ID))
     hosts_for_plugins = get_hosts_for_plugins()
     plugins = hosts_for_plugins.keys()
     for plugin in plugins:
         create_file_with_targets(hosts_for_plugins, plugin)
         run_hydra(plugin)
         try:
-            insert_result_into_database(plugin)
+            insert_result_into_database(list(hosts_for_plugins[plugin].items())[0][0].id, plugin)
         except Exception as e:
             logging.info('Failed to insert results into database')
             logging.info(str(type(e)) + str(e))
-
-    check_for_dangers()
 
 
 if __name__ == '__main__':

@@ -14,6 +14,7 @@ current_file_path = os.path.dirname(os.path.abspath(__file__))
 
 logging.basicConfig(filename=os.path.join(current_file_path, "logs", 'alert_sender.log'), level=logging.INFO,
                     format='%(asctime)s %(message)s')
+logging.info('Starting alert sender script.')
 
 config = ConfigParser()
 config.read(os.path.dirname(os.path.abspath(__file__)) + '/app_config.ini')
@@ -30,6 +31,7 @@ Session = scoped_session(session_factory)
 
 
 def check_for_dangers():
+    logging.info('Checking for dangers.')
     session = Session()
 
     untrusted_hosts = session.query(DetectedHost.address).filter_by(confirmed=False, notified=False).all()
@@ -37,7 +39,7 @@ def check_for_dangers():
     cracked_passwords = session.query(CrackedPassword).filter_by(notified=False).all()
 
     if untrusted_hosts or suspicious_open_ports or cracked_passwords:
-        logging.info('Dangers found. Preparing to send alert...')
+        logging.info('Danger found. Preparing to send alert...')
         detected_hosts = session.query(DetectedHost).all()
         alert_data = {'detected_hosts': detected_hosts, 'untrusted_hosts': untrusted_hosts,
                       'open_ports': suspicious_open_ports, 'cracked_passwords': cracked_passwords}
@@ -70,7 +72,7 @@ def craft_alert_message(alert_data):
     for host in alert_data['detected_hosts']:
         for password in host.cracked_passwords:
             if not password.notified:
-                alert_message += ' - {login} dla aplikacji {service} ({host}:{port})\n'.\
+                alert_message += ' - {login} dla aplikacji {service} ({host}:{port})\n'. \
                     format(service=password.service, port=password.port, host=host.address, login=password.login)
     logging.info('Crafted alert message.')
     return alert_message
@@ -100,3 +102,5 @@ def send_alert(session, alert_message):
 
     server.quit()
     return
+
+check_for_dangers()

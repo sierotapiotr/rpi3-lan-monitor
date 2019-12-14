@@ -6,26 +6,28 @@ from flask_login import login_required, current_user
 
 from database.database import Session, User
 from monitor import app
-from monitor.forms import PasswordResetForm, SettingsForm
+from monitor.forms import ChangePasswordForm, SettingsForm
 
 
-@app.route('/settings', methods=['GET', 'POST'])
+@app.route('/settings', methods=['GET'])
 @login_required
 def settings():
     settings_form = SettingsForm()
-    password_reset_form = PasswordResetForm()
+    password_reset_form = ChangePasswordForm()
 
     if request.method == 'GET':
         settings_form.target.data = current_user.target
 
-    return render_template("settings.html", password_reset_form=password_reset_form, settings_form=settings_form)
+    return render_template("settings.html",
+                           password_reset_form=password_reset_form,
+                           settings_form=settings_form)
 
 
 @app.route('/change_range', methods=['POST'])
 @login_required
 def change_range():
     settings_form = SettingsForm()
-    password_reset_form = PasswordResetForm()
+    password_reset_form = ChangePasswordForm()
 
     if settings_form.validate_on_submit():
         logging.info("Settings form validated.")
@@ -52,7 +54,7 @@ def change_range():
 @login_required
 def change_password():
     settings_form = SettingsForm()
-    password_reset_form = PasswordResetForm()
+    password_reset_form = ChangePasswordForm()
 
     if password_reset_form.validate_on_submit():
         logging.info('Password reset form validated')

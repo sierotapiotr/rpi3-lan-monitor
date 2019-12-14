@@ -1,7 +1,7 @@
 import logging
 
 from flask import flash, redirect, render_template, url_for
-from flask_login import current_user, login_manager, login_required, login_user, logout_user
+from flask_login import current_user, login_required, login_user, logout_user
 
 from database.database import Session, User
 from monitor import app, login_manager

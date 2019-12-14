@@ -1,6 +1,6 @@
 flask
 sqlalchemy
-flask_login
+flask-login == 0.4.1
 flask_wtf
 flask_bootstrap
 python-nmap

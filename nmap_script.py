@@ -1,11 +1,11 @@
 import sys
+
 sys.path.append('/home/piotr/.local/lib/python3.6/site-packages')
 
-from alert_sender import check_for_dangers
 from database.database import User, DetectedHost, OpenPort
 from database.suspicious_ports_services import SUSPICIOUS_PORTS, SUSPICIOUS_SERVICES
 from monitor_utils.db_utils import sqlalchemy_tuples_to_list
-from sqlalchemy import create_engine, exists
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from configparser import ConfigParser
 
@@ -22,8 +22,7 @@ current_file_path = os.path.dirname(os.path.abspath(__file__))
 PATH_LOGS = current_file_path + "/logs/"
 PATH_OUTPUT = current_file_path + "/output/nmap"
 
-logging.basicConfig(filename=PATH_LOGS + 'nmap_log.log', level=logging.INFO, format='%(asctime)s %(message)s')
-
+logging.basicConfig(filename=PATH_LOGS + 'nmap.log', level=logging.INFO, format='%(asctime)s %(message)s')
 config = ConfigParser()
 config.read(os.path.dirname(os.path.abspath(__file__)) + '/app_config.ini')
 
@@ -121,7 +120,6 @@ try:
                 logging.info("Appended port: " + str(port))
         db_session.bulk_save_objects(open_ports)
     db_session.commit()
-    check_for_dangers()
 except Exception as e:
     logging.info(str(type(e)) + str(e))
 finally:

@@ -10,7 +10,6 @@
                 <a href="{{ url_for('toggle_learning') }}" class="btn btn-primary">
                     Rozpocznij naukę sieci</a>
             {% elif user.network_learning == 'active' %}
-                <p>Od X dni trwa nauka sieci. Wykryto Y hostów.</p>
                 <a href="{{ url_for('toggle_learning') }}" class="btn btn-primary">
                     Zakończ naukę sieci</a>
             {% elif user.network_learning == 'finished' and user.monitoring_activated == 0 %}
