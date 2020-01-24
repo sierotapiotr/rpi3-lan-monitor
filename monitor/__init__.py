@@ -27,4 +27,3 @@ logging.basicConfig(filename='logs/monitor_log.log', level=logging.INFO, format=
 import monitor.login
 import monitor.network_state
 import monitor.settings
-import monitor.statistics

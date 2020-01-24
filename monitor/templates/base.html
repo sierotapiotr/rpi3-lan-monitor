@@ -31,7 +31,6 @@
         <nav>
           <ul class="nav nav-justified">
             <li {% if request.path=='/network_state' %}class="active" {% endif %}><a href="{{ url_for('network_state') }}">Stan sieci</a></li>
-            <li {% if request.path=='/statistics' %}class="active" {% endif %}><a href="{{ url_for('statistics') }}">Statystyki</a></li>
             <li {% if request.path=='/settings' %}class="active" {% endif %}><a href="{{ url_for('settings') }}">Ustawienia</a></li>
             <li {% if request.path=='/logout' %}class="active" {% endif %}><a href="{{ url_for('logout') }}">Wyloguj</a></li>
           </ul>

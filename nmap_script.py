@@ -35,6 +35,9 @@ Session = scoped_session(session_factory)
 
 db_session = Session()
 
+if not db_session.query(User.monitoring_activated).filter_by(id=1).first()[0]:
+    logging.info('Monitoring not active, quitting.')
+    sys.exit()
 
 if len(sys.argv) == 1:
     target = db_session.query(User.target).filter_by(id=1).first()[0]
